@@ -1,5 +1,14 @@
 # @computesdk/uno
 
+## 0.1.8
+
+### Patch Changes
+
+- 26e5252: Create a sandbox in one request: `create` asks the API to hold its answer until the machine is ready (`wait_ready_s`, up to 30 s within `readyTimeoutMs`) and no longer polls when it is. If create comes back still starting (an older API, or a wait cut short), readiness is polled as before, now every 100 ms for the first 10 s, then once a second, instead of backing off 250 ms → 2 s; the interval counts from the start of each request, so the round trip no longer adds to the wait.
+- 26e5252: Retry `destroy` when the delete is lost on the way: a dropped connection, a timeout, 429 or a 5xx from the edge is tried again up to four times over about 3 s (each attempt capped at 15 s). Before, one lost DELETE left the machine running and failed the caller's cleanup. DELETE is idempotent, and a repeat of a delete that did land answers 404, which counts as done.
+- 26e5252: Repeat a box read (`getBox`, readiness polling) lost on the way — dropped connection, timeout, 429 or 5xx — up to 4 times over ~3 s, so one dropped poll right after create no longer fails the create and deletes a healthy machine.
+- 26e5252: Keep a sandbox's API calls on one connection: each request now waits one timer tick so the previous response's socket is back in the pool. Without it, Node's `fetch` opened a second connection for a call made right after the previous one, which could reach the API through a different edge server with a cold link to the origin (about +0.2 s).
+
 ## 0.1.7
 
 ### Patch Changes

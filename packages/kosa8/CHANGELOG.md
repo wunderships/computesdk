@@ -1,5 +1,12 @@
 # @computesdk/kosa8
 
+## 1.0.5
+
+### Patch Changes
+
+- 6a0b829: Run commands on the sandbox's host directly when the create answer offers it (`direct`), falling back to the API when the host did not run the command.
+- 6a0b829: Send requests over one HTTP/2 session per origin, opened when the provider is configured (and to a sandbox's host when it is created), instead of a TLS connection per request; `fetch` remains the fallback.
+
 ## 1.0.4
 
 ### Patch Changes
